@@ -12,3 +12,8 @@ steps:
   displayName: 'Use Node 14.x'
   inputs:
     versionSpec: 14.x
+- task: Npm@1
+  displayName: 'npm install'
+  inputs:
+    workingDir: src
+    verbose: false
