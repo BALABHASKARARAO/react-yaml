@@ -1,0 +1,47 @@
+trigger:
+  branches:
+    include:
+    - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '14.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install
+    npm run build
+    #npm run test:coverage
+    npm run test -- --coverage . --watchAll=false
+  workingDirectory: $(System.DefaultWorkingDirectory)
+  displayName: 'Install dependencies, build and run tests'
+
+- task: SonarCloudPrepare@1
+  inputs:
+    SonarCloud: 'bala-sonarcloud-connection'
+    organization: 'balabhaskararaog'
+    scannerMode: 'CLI'
+    configMode: 'manual'
+    cliProjectKey: 'React-SonarQube-2'
+    cliProjectName: 'React-SonarQube-2'
+    cliSources: 'src'
+  displayName: 'Prepare analysis on SonarCloud'
+
+#- script: |
+#    npx sonar-scanner -Dsonar.organization=balabhaskararaog -Dsonar.projectKey=React-SonarQube-2
+    #npm install -g sonarqube-scanner
+    #sonar-scanner
+#  workingDirectory: $(System.DefaultWorkingDirectory)
+#  displayName: 'Run SonarCloud analysis'
+
+- task: SonarCloudAnalyze@1
+  displayName: 'Analyze SonarCloud results'
+
+- task: SonarCloudPublish@1
+  inputs:
+    pollingTimeoutSec: '300'
+  displayName: 'Publish SonarCloud results'
